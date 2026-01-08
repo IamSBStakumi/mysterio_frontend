@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Difficulty } from "@/types/mysterio";
 import { saveSessionData } from "@/utils/session-storage";
+import { useMutation } from "@tanstack/react-query";
 import GameTitle from "./components/GameTitle";
 import PlayerCountInput from "./components/settings/PlayerCountInput";
 import DifficultyInput from "./components/settings/DifficultyInput";
@@ -13,14 +14,8 @@ export default function HomePage() {
   const router = useRouter();
   const [playerCount, setPlayerCount] = useState<number>(5);
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
+  const createSession = async () => {
     try {
       const response = await fetch("/api/sessions", {
         method: "POST",
@@ -39,6 +34,21 @@ export default function HomePage() {
 
       const sessionData = await response.json();
 
+      return sessionData;
+    } catch (err) {
+      throw new Error("セッションの作成に失敗しました");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    mutation.mutate();
+  };
+
+  const mutation = useMutation({
+    mutationFn: createSession,
+    onSuccess: (sessionData) => {
       saveSessionData({
         sessionId: sessionData.sessionId,
         playerId: sessionData.ownerPlayerId,
@@ -46,33 +56,38 @@ export default function HomePage() {
         playerIds: sessionData.playerIds,
       });
 
-      // セッション作成成功後、セッション管理画面へ遷移
-      // ownerPlayerIdをクエリパラメータで渡す
       router.push(`/session/${sessionData.sessionId}`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "セッションの作成に失敗しました");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    onError: (err) => {
+      return err instanceof Error ? err.message : "セッションの作成に失敗しました";
+    },
+  });
 
   return (
     <div className="max-w-md w-full bg-slate-800 rounded-xl shadow-2xl p-8">
       <GameTitle />
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <PlayerCountInput playerCount={playerCount} setPlayerCount={setPlayerCount} isLoading={isLoading} />
+        <PlayerCountInput
+          playerCount={playerCount}
+          setPlayerCount={setPlayerCount}
+          isLoading={mutation.status === "pending"}
+        />
 
-        <DifficultyInput difficulty={difficulty} setDifficulty={setDifficulty} isLoading={isLoading} />
+        <DifficultyInput
+          difficulty={difficulty}
+          setDifficulty={setDifficulty}
+          isLoading={mutation.status === "pending"}
+        />
 
         {/* エラーメッセージ */}
-        {error && (
+        {mutation.isError && (
           <div className="p-4 bg-red-500/20 border border-red-500 rounded-lg">
-            <p className="text-red-400 text-sm">{error}</p>
+            <p className="text-red-400 text-sm">{mutation.error.message}</p>
           </div>
         )}
 
-        <SessionCreateButton isLoading={isLoading} />
+        <SessionCreateButton isLoading={mutation.status === "pending"} />
       </form>
 
       <div className="mt-6 text-center">
