@@ -1,9 +1,9 @@
-// src/app/page.tsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Difficulty } from "@/types/mysterio";
+import { saveSessionData } from "@/utils/session-storage";
 
 export default function HomePage() {
   const router = useRouter();
@@ -34,6 +34,13 @@ export default function HomePage() {
       }
 
       const sessionData = await response.json();
+
+      saveSessionData({
+        sessionId: sessionData.sessionId,
+        playerId: sessionData.ownerPlayerId,
+        isOwner: true,
+        playerIds: sessionData.playerIds,
+      });
 
       // セッション作成成功後、セッション管理画面へ遷移
       // ownerPlayerIdをクエリパラメータで渡す
