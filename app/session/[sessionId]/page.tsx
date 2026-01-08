@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getSessionData } from "@/utils/session-storage";
 import { PhaseResponse } from "@/types/mysterio";
 import QRCode from "qrcode";
+import Header from "./Header";
 
 export default function SessionPage() {
   const params = useParams();
@@ -39,7 +40,12 @@ export default function SessionPage() {
 
     const fetchPhaseData = async () => {
       try {
-        const response = await fetch(`/api/session/${sessionId}/phase`);
+        const response = await fetch(`/api/session/${sessionId}/phase`, {
+          headers: {
+            "Content-Type": "application/json",
+            "x-player-id": sessionData.playerId,
+          },
+        });
         setPhaseData(await response.json());
         setError(null);
       } catch (err) {
@@ -152,18 +158,7 @@ export default function SessionPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-8">
-      {/* ヘッダー */}
-      <div className="bg-slate-800 rounded-xl shadow-2xl p-6 mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-            Mysterio
-          </h1>
-          {sessionData?.isOwner && (
-            <span className="px-3 py-1 bg-purple-500 text-white text-sm font-semibold rounded-full">オーナー</span>
-          )}
-        </div>
-        <p className="text-slate-400 text-sm">Session ID: {sessionId}</p>
-      </div>
+      <Header sessionId={sessionId} isOwner={sessionData?.isOwner} />
 
       {/* プレイヤーリンク配布（オーナーのみ） */}
       {sessionData?.isOwner && (
@@ -252,7 +247,7 @@ export default function SessionPage() {
             <button
               onClick={handleAdvancePhase}
               disabled={isAdvancing}
-              className="w-full py-4 px-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-lg hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition transform hover:scale-105 active:scale-95"
+              className="w-full py-4 px-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-lg hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition transform hover:scale-105 active:scale-95 cursor-pointer"
             >
               {isAdvancing ? "進行中..." : "次のフェーズへ進む"}
             </button>
@@ -261,7 +256,7 @@ export default function SessionPage() {
           {phaseData.phaseType === "reveal" && (
             <button
               onClick={handleViewResult}
-              className="w-full py-4 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-lg hover:from-green-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-slate-800 transition transform hover:scale-105 active:scale-95"
+              className="w-full py-4 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-lg hover:from-green-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-slate-800 transition transform hover:scale-105 active:scale-95 cursor-pointer"
             >
               結果を表示
             </button>
