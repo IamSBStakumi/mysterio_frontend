@@ -1,6 +1,5 @@
 import { CreateSessionRequest, CreateSessionResponse } from "@/types/mysterio";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
+import { BACKEND_URL } from "@/utils/defineTargetUrl";
 
 export async function createSession(data: CreateSessionRequest): Promise<CreateSessionResponse> {
   const response = await fetch(`${BACKEND_URL}/api/v1/sessions`, {
