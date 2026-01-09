@@ -10,8 +10,11 @@ export async function POST(request: NextRequest, { params }: { params: { session
     if (!playerId) {
       return NextResponse.json({ message: "Player ID is required" }, { status: 400 });
     }
+    const body = await request.json();
 
-    const result = await vote(sessionId, playerId, await request.json());
+    console.log(body);
+
+    const result = await vote(sessionId, playerId, body.targetPlayerId);
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     console.error("Error voting:", error);
