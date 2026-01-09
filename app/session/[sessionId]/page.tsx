@@ -1,4 +1,3 @@
-// src/app/session/[sessionId]/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,6 +6,7 @@ import { getSessionData } from "@/utils/session-storage";
 import { PhaseResponse } from "@/types/mysterio";
 import QRCode from "qrcode";
 import Header from "./Header";
+import ErrorView from "./ErrorView";
 
 export default function SessionPage() {
   const params = useParams();
@@ -93,10 +93,22 @@ export default function SessionPage() {
     setError(null);
 
     try {
-      await fetch(`/api/session/${sessionId}/advance-phase`);
+      await fetch(`/api/session/${sessionId}/phase/advance`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-player-id": sessionData.playerId,
+        },
+      });
 
       // フェーズデータを再取得
-      const response = await fetch(`/api/session/${sessionId}/phase`);
+      const response = await fetch(`/api/session/${sessionId}/phase`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "x-player-id": sessionData.playerId,
+        },
+      });
       setPhaseData(await response.json());
     } catch (err) {
       setError(err instanceof Error ? err.message : "フェーズの進行に失敗しました");
@@ -140,20 +152,7 @@ export default function SessionPage() {
   }
 
   if (error && !phaseData) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-slate-800 rounded-xl shadow-2xl p-8">
-          <h2 className="text-2xl font-bold text-red-400 mb-4">エラー</h2>
-          <p className="text-slate-300 mb-6">{error}</p>
-          <button
-            onClick={() => router.push("/")}
-            className="w-full py-3 px-6 bg-purple-500 text-white font-bold rounded-lg hover:bg-purple-600 transition"
-          >
-            トップページへ戻る
-          </button>
-        </div>
-      </div>
-    );
+    return <ErrorView error={error} />;
   }
 
   return (
@@ -222,14 +221,14 @@ export default function SessionPage() {
             <div className="bg-slate-700 rounded-lg p-4 text-slate-300 whitespace-pre-wrap">{phaseData.publicText}</div>
           </div>
 
-          {phaseData.privateText && (
+          {/* {phaseData.privateText && (
             <div className="mb-4">
               <h3 className="text-sm font-semibold text-pink-400 mb-2">あなただけの情報</h3>
               <div className="bg-slate-700 rounded-lg p-4 text-slate-300 whitespace-pre-wrap border-2 border-pink-500/30">
                 {phaseData.privateText}
               </div>
             </div>
-          )}
+          )} */}
         </div>
       )}
 
