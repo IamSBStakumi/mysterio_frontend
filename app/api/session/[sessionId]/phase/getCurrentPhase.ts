@@ -1,5 +1,8 @@
+import { BACKEND_URL } from "@/utils/defineTargetUrl";
+
 const getCurrentPhase = async (sessionId: string, playerId: string) => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/sessions/${sessionId}/phase`, {
+  const response = await fetch(`${BACKEND_URL}/api/v1/sessions/${sessionId}/phase`, {
+    method: "GET",
     headers: {
       "Content-Type": "application/json",
       "x-player-id": playerId,
@@ -7,7 +10,7 @@ const getCurrentPhase = async (sessionId: string, playerId: string) => {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch phase");
+    throw new Error("現在のフェーズ取得に失敗しました");
   }
 
   return await response.json();

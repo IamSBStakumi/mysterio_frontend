@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import getPhase from "./getCurrentPhase";
 
-export async function GET(request: NextRequest, ctx: RouteContext<"/api/session/[sessionId]/phase">) {
+export async function GET(request: NextRequest, { params }: { params: { sessionId: string } }) {
   try {
-    const { sessionId } = (await ctx.params) as { sessionId: string };
+    const resolvedParams = await params;
+    const sessionId = resolvedParams.sessionId;
     const playerId = request.headers.get("x-player-id");
 
     if (!playerId) {
