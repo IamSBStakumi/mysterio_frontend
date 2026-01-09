@@ -122,6 +122,11 @@ export default function SessionPage() {
     router.push(`/session/${sessionId}/result`);
   };
 
+  // 投票画面へ遷移
+  const handleGoToVote = () => {
+    router.push(`/session/${sessionId}/vote`);
+  };
+
   const getPhaseTypeLabel = (phaseType: string): string => {
     switch (phaseType) {
       case "introduction":
@@ -242,13 +247,20 @@ export default function SessionPage() {
       {/* アクションボタン */}
       {sessionData?.isOwner && phaseData && (
         <div className="bg-slate-800 rounded-xl shadow-2xl p-6">
-          {phaseData.availableActions.includes("advance_phase") && (
+          {phaseData.availableActions.includes("advance_phase") ? (
             <button
               onClick={handleAdvancePhase}
               disabled={isAdvancing}
               className="w-full py-4 px-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-lg hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition transform hover:scale-105 active:scale-95 cursor-pointer"
             >
               {isAdvancing ? "進行中..." : "次のフェーズへ進む"}
+            </button>
+          ) : (
+            <button
+              onClick={handleGoToVote}
+              className="w-full py-4 px-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-lg hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition transform hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              投票する
             </button>
           )}
 
